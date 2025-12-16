@@ -1,26 +1,30 @@
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 
 const SignIn = () => {
+  const navigate = useNavigate();
+
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    localStorage.setItem("isLoggedIn", "true");
+    navigate("/dashboard");
+  };
+
   return (
     <div className="relative min-h-screen overflow-hidden">
       
-      {/* Background image placeholder */}
+      {/* Background */}
       <div
         className="absolute inset-0 bg-cover bg-center"
-        style={{
-          backgroundImage: "url('/hero-bg.jpg')",
-        }}
-      ></div>
+        style={{ backgroundImage: "url('/hero-bg.jpg')" }}
+      />
 
       {/* Overlay */}
       <div className="absolute inset-0 bg-black/60"></div>
 
       {/* Content */}
       <div className="relative z-10 flex items-center justify-center min-h-screen px-4">
-        
         <div className="w-full max-w-md bg-white/95 backdrop-blur-md rounded-xl shadow-lg p-6 md:p-8">
           
-          {/* Header */}
           <div className="text-center mb-6">
             <h1 className="text-2xl font-bold text-gray-900">
               Welcome back
@@ -30,9 +34,7 @@ const SignIn = () => {
             </p>
           </div>
 
-          {/* Form */}
-          <form className="space-y-4">
-            
+          <form onSubmit={handleSubmit} className="space-y-4">
             <div>
               <label className="block text-sm font-medium text-gray-700">
                 Email
@@ -63,7 +65,6 @@ const SignIn = () => {
             </button>
           </form>
 
-          {/* Footer */}
           <p className="text-center text-sm text-gray-600 mt-6">
             Don’t have an account?{" "}
             <Link to="/signup" className="text-black font-medium hover:underline">

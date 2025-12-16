@@ -1,7 +1,22 @@
 import logo from "../assets/icon.png";
 import { Link } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
+import { isLoggedIn } from "../utils/auth";
+
 
 const Landing = () => {
+
+const navigate = useNavigate();
+
+const handleGetStarted = () => {
+  if (isLoggedIn()) {
+    navigate("/dashboard");
+  } else {
+    navigate("/signin");
+  }
+};
+
+
   return (
     <div className="relative min-h-screen bg-[#f6f7f9] overflow-hidden">
       {/* Background image placeholder */}
@@ -55,9 +70,13 @@ const Landing = () => {
             expenses, plan budgets, and save smarter — all in one place.
           </p>
 
-          <button className="mt-8 px-6 py-3 bg-black text-white rounded-lg text-sm hover:bg-gray-800">
-            Get started
-          </button>
+          <button
+  onClick={handleGetStarted}
+  className="mt-8 px-6 py-3 bg-black text-white rounded-lg text-sm hover:bg-gray-800"
+>
+  Get started
+</button>
+
         </section>
       </div>
     </div>
