@@ -1,6 +1,6 @@
 const ActivityChart = () => {
   return (
-    <div className="bg-white rounded-xl border border-gray-200 p-6 hover:shadow-md transition">
+    <div className="bg-white rounded-xl border border-gray-200 p-6 hover:shadow-md h-[420px] transition">
       
       {/* Header */}
       <div className="flex items-center justify-between mb-6">

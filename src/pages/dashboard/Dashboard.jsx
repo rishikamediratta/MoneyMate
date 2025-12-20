@@ -2,6 +2,7 @@ import Navbar from "../../components/dashboard/Navbar";
 import Sidebar from "../../components/dashboard/Sidebar";
 import Cards from "../../components/dashboard/Cards";
 import ActivityChart from "../../components/dashboard/ActivityChart";
+import LatestBudgets from "../../components/dashboard/LatestBudgets";
 
 
 const Dashboard = () => {
@@ -18,19 +19,20 @@ const Dashboard = () => {
   <Cards />
 
   {/* LOWER SECTION */}
-  <div className="mt-8 grid grid-cols-1 lg:grid-cols-3 gap-6">
-    
-    {/* LEFT: Activity Chart */}
-    <div className="lg:col-span-2">
-      <ActivityChart />
-    </div>
-
-    {/* RIGHT: Latest budgets will go here */}
-    <div>
-      {/* LatestBudgets */}
-    </div>
-
+    <div className="mt-8 grid grid-cols-1 lg:grid-cols-3 gap-6">
+  
+  {/* LEFT */}
+  <div className="lg:col-span-2">
+    <ActivityChart />
   </div>
+
+  {/* RIGHT */}
+  <div>
+    <LatestBudgets />
+  </div>
+
+</div>
+
 </main>
 
       </div>
