@@ -3,6 +3,7 @@ import Sidebar from "../../components/dashboard/Sidebar";
 import Cards from "../../components/dashboard/Cards";
 import ActivityChart from "../../components/dashboard/ActivityChart";
 import LatestBudgets from "../../components/dashboard/LatestBudgets";
+import LatestExpenses from "../../components/dashboard/LatestExpenses";
 
 
 const Dashboard = () => {
@@ -32,6 +33,7 @@ const Dashboard = () => {
   </div>
 
 </div>
+  <LatestExpenses />
 
 </main>
 
