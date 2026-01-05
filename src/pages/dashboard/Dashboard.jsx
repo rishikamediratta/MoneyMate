@@ -15,6 +15,16 @@ const [transactions, settransactions] = useState([
     { id: 3, name: "Netflix", amount: 199, date: "2025-12-16" }
   ])
 
+  const totalSpent = transactions.reduce((sum, txn) => {
+    return sum + txn.amount;
+    }, 0);
+      const monthlyBudget = 20000;
+      const savings = monthlyBudget - totalSpent;
+      const usagePercent =
+      monthlyBudget > 0
+       ? Math.min(100, Math.round((totalSpent / monthlyBudget) * 100))
+        : 0;
+
   return (
     <div className="min-h-screen bg-[#f6f7f9]">
       <Navbar />
@@ -25,7 +35,12 @@ const [transactions, settransactions] = useState([
        <main className="flex-1 p-6">
   
   {/* TOP CARDS */}
-  <Cards />
+  <Cards 
+    totalSpent={totalSpent}
+    monthlyBudget={monthlyBudget}
+    savings={savings}
+    usagePercent={usagePercent}
+  />
 
   {/* LOWER SECTION */}
     <div className="mt-8 grid grid-cols-1 lg:grid-cols-3 gap-6">

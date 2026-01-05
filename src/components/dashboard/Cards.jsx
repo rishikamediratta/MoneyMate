@@ -1,4 +1,4 @@
-const Cards = () => {
+const Cards = ({ totalSpent, monthlyBudget, savings, usagePercent }) => {
   return (
     <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
       
@@ -7,7 +7,7 @@ const Cards = () => {
         <div>
           <p className="text-sm text-gray-500">Total Spent</p>
           <h2 className="text-2xl font-bold text-gray-900 mt-1">
-            ₹24,500
+            ₹ {totalSpent}
           </h2>
           <p className="text-xs text-blue-600 mt-1">
             This month
@@ -25,16 +25,20 @@ const Cards = () => {
         <div>
           <p className="text-sm text-gray-500">Monthly Budget</p>
           <h2 className="text-2xl font-bold text-gray-900 mt-1">
-            ₹40,000
+            ₹ {monthlyBudget}
           </h2>
 
           {/* Progress */}
           <div className="mt-2 h-2 w-32 bg-sky-100 rounded-full overflow-hidden">
-            <div className="h-full w-[60%] bg-sky-500 rounded-full"></div>
+            <div
+  className="h-full bg-sky-500 rounded-full"
+  style={{ width: `${usagePercent}%` }}
+></div>
+
           </div>
 
           <p className="text-xs text-sky-600 mt-1">
-            60% used
+            {usagePercent}% used
           </p>
         </div>
 
@@ -49,7 +53,7 @@ const Cards = () => {
         <div>
           <p className="text-sm text-gray-500">Savings</p>
           <h2 className="text-2xl font-bold text-gray-900 mt-1">
-            ₹15,500
+            ₹ {savings}
           </h2>
           <p className="text-xs text-indigo-600 mt-1">
             After expenses
