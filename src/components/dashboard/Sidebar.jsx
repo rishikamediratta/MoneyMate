@@ -17,11 +17,11 @@ const Sidebar = () => {
           📊 Dashboard
         </NavLink>
 
-        <NavLink to="/budgets" className={linkClasses}>
+        <NavLink to="/dashboard/budget" className={linkClasses}>
           💰 Budgets
         </NavLink>
 
-        <NavLink to="/expenses" className={linkClasses}>
+        <NavLink to="/dashboard/expenses" className={linkClasses}>
           🧾 Expenses
         </NavLink>
       </nav>
