@@ -8,37 +8,31 @@ import CreateBudgetModal from "../../components/budget/CreateBudgetModal";
 const STORAGE_KEY = "moneymate_budgets";
 
 const Budget = () => {
-  // Budgets state
-  const [budgets, setBudgets] = useState([
-    {
-      id: 1,
-      icon: "🛍️",
-      name: "Shopping",
-      amount: 5000,
-      expenses: [
-        { id: 1, name: "Shoes", amount: 1200 },
-        { id: 2, name: "Bag", amount: 800 }
-      ]
-    }
-  ]);
-
-  // Modal state
+  // ✅ single source of truth
+  const [budgets, setBudgets] = useState([]);
   const [showModal, setShowModal] = useState(false);
 
-  // Load from localStorage
+  // ✅ load from localStorage ONCE
   useEffect(() => {
     const stored = localStorage.getItem(STORAGE_KEY);
     if (stored) {
-      setBudgets(JSON.parse(stored));
+      try {
+        const parsed = JSON.parse(stored);
+        if (Array.isArray(parsed)) {
+          setBudgets(parsed);
+        }
+      } catch (e) {
+        console.error("Invalid localStorage data", e);
+      }
     }
   }, []);
 
-  // Save to localStorage
+  // ✅ save on every change
   useEffect(() => {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(budgets));
   }, [budgets]);
 
-  // Add new budget
+  // ✅ add new budget
   const addBudget = (newBudget) => {
     setBudgets((prev) => [...prev, newBudget]);
   };
@@ -53,7 +47,6 @@ const Budget = () => {
         <main className="flex-1 p-6">
           <h1 className="text-2xl font-semibold">My Budgets</h1>
 
-          {/* Budget Cards */}
           <div className="mt-6 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
             <CreateBudgetCard onClick={() => setShowModal(true)} />
 
@@ -64,7 +57,6 @@ const Budget = () => {
         </main>
       </div>
 
-      {/* Create Budget Modal */}
       {showModal && (
         <CreateBudgetModal
           onClose={() => setShowModal(false)}
