@@ -1,81 +1,61 @@
-const LatestExpenses = ({ transactions, setTransactions }) => {
+import { inr } from "../../utils/format";
 
-  // Delete expense
-  const deleteExpense = (id) => {
-    setTransactions((prev) => prev.filter((item) => item.id !== id));
-  };
+const LatestExpenses = ({ expenses = [], onDelete }) => (
+  <div className="mt-6 bg-white dark:bg-slate-800 rounded-2xl border border-slate-100 dark:border-slate-700 shadow-sm p-6">
+    <div className="mb-5">
+      <h2 className="text-base font-bold text-slate-900 dark:text-white">Latest Expenses</h2>
+      <p className="text-xs text-slate-400 dark:text-slate-500 mt-0.5">Recently added</p>
+    </div>
 
-  return (
-    <div className="mt-8 bg-white rounded-xl border border-gray-200 p-6">
-
-      {/* Header */}
-      <div className="mb-4">
-        <h2 className="text-lg font-semibold text-gray-900">
-          Latest Expenses
-        </h2>
-        <p className="text-sm text-gray-500">
-          Recently added expenses
-        </p>
+    {expenses.length === 0 ? (
+      <div className="text-center py-10 text-slate-400 dark:text-slate-500">
+        <span className="text-3xl block mb-2">🧾</span>
+        <p className="text-sm">No expenses in this period</p>
       </div>
-
-      {/* Table */}
-      <div className="overflow-x-auto rounded-lg border border-gray-200">
+    ) : (
+      <div className="overflow-x-auto rounded-xl border border-slate-100 dark:border-slate-700">
         <table className="w-full text-sm border-collapse">
-
-          {/* Table Head */}
           <thead>
-            <tr className="bg-blue-700 text-white">
-              <th className="py-3 px-4 text-left font-semibold">Name</th>
-              <th className="py-3 px-4 text-left font-semibold">Amount</th>
-              <th className="py-3 px-4 text-left font-semibold">Date</th>
-              <th className="py-3 px-4 text-center font-semibold">Action</th>
+            <tr className="bg-gradient-to-r from-slate-800 to-slate-900 dark:from-slate-900 dark:to-slate-950 text-white">
+              <th className="py-3.5 px-4 text-left text-xs font-bold uppercase tracking-widest">Name</th>
+              <th className="py-3.5 px-4 text-left text-xs font-bold uppercase tracking-widest">Budget</th>
+              <th className="py-3.5 px-4 text-left text-xs font-bold uppercase tracking-widest">Amount</th>
+              <th className="py-3.5 px-4 text-left text-xs font-bold uppercase tracking-widest">Date</th>
+              <th className="py-3.5 px-4 text-center text-xs font-bold uppercase tracking-widest">Del</th>
             </tr>
           </thead>
-
-          {/* Table Body */}
           <tbody>
-            {transactions.map((expense, index) => (
-              <tr
-                key={expense.id}
-                className={`border-b border-gray-100 transition
-                  ${index % 2 === 0 ? "bg-white" : "bg-blue-50"}
-                  hover:bg-blue-100`}
-              >
-                <td className="py-3 px-4 font-medium text-gray-900">
-                  {expense.name}
+            {[...expenses].slice(-10).reverse().map((exp, i) => (
+              <tr key={`${exp.budgetId}-${exp.id}`}
+                className={`border-b border-slate-100 dark:border-slate-700 transition-colors duration-150 hover:bg-blue-50 dark:hover:bg-blue-900/20
+                  ${i % 2 === 0 ? "bg-white dark:bg-slate-800" : "bg-blue-50/40 dark:bg-slate-700/30"}`}>
+                <td className="py-3 px-4 font-semibold text-slate-800 dark:text-slate-200">{exp.name}</td>
+                <td className="py-3 px-4">
+                  <span className="inline-flex items-center gap-1.5 text-xs font-medium
+                                   text-slate-600 dark:text-slate-400 bg-slate-100 dark:bg-slate-700
+                                   px-2.5 py-1 rounded-full">
+                    {exp.budgetIcon} {exp.budgetName}
+                  </span>
                 </td>
-
-                <td className="py-3 px-4 font-semibold text-blue-700 bg-blue-50">
-                  ₹{expense.amount}
-                </td>
-
-                <td className="py-3 px-4 text-gray-600">
-                  {expense.date}
-                </td>
-
+                <td className="py-3 px-4 font-bold text-blue-600 dark:text-blue-400">₹{inr(exp.amount)}</td>
+                <td className="py-3 px-4 text-slate-500 dark:text-slate-400 text-xs">{exp.date}</td>
                 <td className="py-3 px-4 text-center">
-                  <button
-                    onClick={() => deleteExpense(expense.id)}
-                    className="w-9 h-9 flex items-center justify-center rounded-full
-                               text-red-500 hover:text-white
-                               hover:bg-red-500 transition transform hover:scale-105"
-                  >
-                    🗑️
-                  </button>
+                  {onDelete && (
+                    <button onClick={() => onDelete(exp.budgetId, exp.id)}
+                      className="w-8 h-8 inline-flex items-center justify-center rounded-lg
+                                 text-slate-300 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-900/30
+                                 transition-all duration-200">
+                      🗑️
+                    </button>
+                  )}
                 </td>
               </tr>
             ))}
           </tbody>
         </table>
-
-        {transactions.length === 0 && (
-          <p className="text-center text-gray-500 py-6">
-            No expenses added yet
-          </p>
-        )}
       </div>
-    </div>
-  );
-};
+    )}
+  </div>
+);
 
 export default LatestExpenses;

@@ -1,69 +1,39 @@
-import { useEffect, useState } from "react";
-import Navbar from "../../components/dashboard/Navbar";
-import Sidebar from "../../components/dashboard/Sidebar";
+import DashboardLayout from "../../components/dashboard/DashboardLayout";
 import BudgetCard from "../../components/budget/BudgetCard";
 import CreateBudgetCard from "../../components/budget/CreateBudgetCard";
 import CreateBudgetModal from "../../components/budget/CreateBudgetModal";
-
-const STORAGE_KEY = "moneymate_budgets";
+import { useBudgets } from "../../hooks/useBudgets";
+import { useState } from "react";
 
 const Budget = () => {
-  // ✅ single source of truth
-  const [budgets, setBudgets] = useState([]);
+  const { budgets, addBudget, deleteBudget } = useBudgets();
   const [showModal, setShowModal] = useState(false);
 
-  // ✅ load from localStorage ONCE
-  useEffect(() => {
-    const stored = localStorage.getItem(STORAGE_KEY);
-    if (stored) {
-      try {
-        const parsed = JSON.parse(stored);
-        if (Array.isArray(parsed)) {
-          setBudgets(parsed);
-        }
-      } catch (e) {
-        console.error("Invalid localStorage data", e);
-      }
-    }
-  }, []);
-
-  // ✅ save on every change
-  useEffect(() => {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(budgets));
-  }, [budgets]);
-
-  // ✅ add new budget
-  const addBudget = (newBudget) => {
-    setBudgets((prev) => [...prev, newBudget]);
-  };
-
   return (
-    <div className="min-h-screen bg-[#f6f7f9]">
-      <Navbar />
+    <DashboardLayout>
+      <div className="mb-6">
+        <h1 className="text-xl font-bold text-slate-900">My Budgets</h1>
+        <p className="text-sm text-slate-400 mt-0.5">Create and manage your spending limits</p>
+      </div>
 
-      <div className="flex">
-        <Sidebar />
-
-        <main className="flex-1 p-6">
-          <h1 className="text-2xl font-semibold">My Budgets</h1>
-
-          <div className="mt-6 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-            <CreateBudgetCard onClick={() => setShowModal(true)} />
-
-            {budgets.map((budget) => (
-              <BudgetCard key={budget.id} budget={budget} />
-            ))}
-          </div>
-        </main>
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
+        <CreateBudgetCard onClick={() => setShowModal(true)} />
+        {budgets.map((budget) => (
+          <BudgetCard
+            key={budget.id}
+            budget={budget}
+            onDelete={deleteBudget}
+          />
+        ))}
       </div>
 
       {showModal && (
         <CreateBudgetModal
           onClose={() => setShowModal(false)}
-          onCreate={addBudget}
+          onCreate={(b) => { addBudget(b); setShowModal(false); }}
         />
       )}
-    </div>
+    </DashboardLayout>
   );
 };
 

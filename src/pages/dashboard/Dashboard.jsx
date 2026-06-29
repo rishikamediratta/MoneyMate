@@ -1,70 +1,144 @@
-import Navbar from "../../components/dashboard/Navbar";
-import Sidebar from "../../components/dashboard/Sidebar";
+import { useState, useMemo } from "react";
+import DashboardLayout from "../../components/dashboard/DashboardLayout";
 import Cards from "../../components/dashboard/Cards";
 import ActivityChart from "../../components/dashboard/ActivityChart";
 import LatestBudgets from "../../components/dashboard/LatestBudgets";
 import LatestExpenses from "../../components/dashboard/LatestExpenses";
-import { useState } from "react";
+import { useBudgets } from "../../hooks/useBudgets";
 
+// Get current month string e.g. "2025-12"
+const currentMonthStr = () => {
+  const now = new Date();
+  return `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}`;
+};
 
 const Dashboard = () => {
+  const { budgets, allExpenses, totalBudget, deleteExpense } = useBudgets();
 
-const [transactions, settransactions] = useState([
-    { id: 1, name: "Groceries", amount: 1200, date: "2025-12-18" },
-    { id: 2, name: "Uber Ride", amount: 450, date: "2025-12-17" },
-    { id: 3, name: "Netflix", amount: 199, date: "2025-12-16" }
-  ])
+  // Filter mode: "month" or "range"
+  const [filterMode, setFilterMode] = useState("month");
+  const [selectedMonth, setSelectedMonth] = useState(currentMonthStr());
+  const [fromDate, setFromDate] = useState("");
+  const [toDate, setToDate] = useState("");
 
-  const totalSpent = transactions.reduce((sum, txn) => {
-    return sum + txn.amount;
-    }, 0);
-      const monthlyBudget = 20000;
-      const savings = monthlyBudget - totalSpent;
-      const usagePercent =
-      monthlyBudget > 0
-       ? Math.min(100, Math.round((totalSpent / monthlyBudget) * 100))
-        : 0;
+  // Filter expenses by selected period
+  const filteredExpenses = useMemo(() => {
+    return allExpenses.filter((exp) => {
+      if (!exp.date) return false;
+      if (filterMode === "month") {
+        return exp.date.startsWith(selectedMonth);
+      }
+      // range mode
+      const d = exp.date;
+      const from = fromDate || "0000-01-01";
+      const to = toDate || "9999-12-31";
+      return d >= from && d <= to;
+    });
+  }, [allExpenses, filterMode, selectedMonth, fromDate, toDate]);
+
+  const totalSpent = filteredExpenses.reduce((s, e) => s + e.amount, 0);
+  const savings = totalBudget - totalSpent;
+  const usagePercent =
+    totalBudget > 0 ? Math.min(100, Math.round((totalSpent / totalBudget) * 100)) : 0;
 
   return (
-    <div className="min-h-screen bg-[#f6f7f9]">
-      <Navbar />
-
-      <div className="flex">
-        <Sidebar />
-
-       <main className="flex-1 p-6">
-  
-  {/* TOP CARDS */}
-  <Cards 
-    totalSpent={totalSpent}
-    monthlyBudget={monthlyBudget}
-    savings={savings}
-    usagePercent={usagePercent}
-  />
-
-  {/* LOWER SECTION */}
-    <div className="mt-8 grid grid-cols-1 lg:grid-cols-3 gap-6">
-  
-  {/* LEFT */}
-  <div className="lg:col-span-2">
-    <ActivityChart />
-  </div>
-
-  {/* RIGHT */}
-  <div>
-    <LatestBudgets />
-  </div>
-
-</div>
-  <LatestExpenses
-    transactions={transactions}
-  setTransactions={settransactions}  
-  />
-
-</main>
-
+    <DashboardLayout>
+      {/* PAGE HEADER */}
+      <div className="mb-6">
+        <h1 className="text-xl font-bold text-slate-900">Dashboard</h1>
+        <p className="text-sm text-slate-400 mt-0.5">Track your spending and budgets</p>
       </div>
-    </div>
+
+      {/* DATE FILTER BAR */}
+      <div className="bg-white rounded-2xl border border-slate-100 shadow-sm p-4 mb-6 flex flex-wrap items-center gap-3">
+        {/* Mode Toggle */}
+        <div className="flex bg-slate-100 rounded-xl p-1 gap-1">
+          <button
+            onClick={() => setFilterMode("month")}
+            className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-all duration-200
+              ${filterMode === "month" ? "bg-white shadow-sm text-slate-900" : "text-slate-500 hover:text-slate-700"}`}
+          >
+            📅 Month
+          </button>
+          <button
+            onClick={() => setFilterMode("range")}
+            className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-all duration-200
+              ${filterMode === "range" ? "bg-white shadow-sm text-slate-900" : "text-slate-500 hover:text-slate-700"}`}
+          >
+            📆 Date Range
+          </button>
+        </div>
+
+        {/* Month Picker */}
+        {filterMode === "month" && (
+          <input
+            type="month"
+            value={selectedMonth}
+            onChange={(e) => setSelectedMonth(e.target.value)}
+            className="border border-slate-200 rounded-xl px-3 py-1.5 text-xs font-medium text-slate-700
+                       focus:outline-none focus:ring-2 focus:ring-blue-500/30 focus:border-blue-400
+                       transition-all duration-200 bg-white"
+          />
+        )}
+
+        {/* Date Range Picker */}
+        {filterMode === "range" && (
+          <div className="flex items-center gap-2">
+            <div className="flex items-center gap-1.5">
+              <span className="text-xs text-slate-400 font-medium">From</span>
+              <input
+                type="date"
+                value={fromDate}
+                onChange={(e) => setFromDate(e.target.value)}
+                className="border border-slate-200 rounded-xl px-3 py-1.5 text-xs font-medium text-slate-700
+                           focus:outline-none focus:ring-2 focus:ring-blue-500/30 focus:border-blue-400
+                           transition-all duration-200 bg-white"
+              />
+            </div>
+            <div className="flex items-center gap-1.5">
+              <span className="text-xs text-slate-400 font-medium">To</span>
+              <input
+                type="date"
+                value={toDate}
+                onChange={(e) => setToDate(e.target.value)}
+                className="border border-slate-200 rounded-xl px-3 py-1.5 text-xs font-medium text-slate-700
+                           focus:outline-none focus:ring-2 focus:ring-blue-500/30 focus:border-blue-400
+                           transition-all duration-200 bg-white"
+              />
+            </div>
+          </div>
+        )}
+
+        {/* Summary badge */}
+        <span className="ml-auto text-xs text-slate-400 bg-slate-50 px-3 py-1.5 rounded-lg font-medium">
+          {filteredExpenses.length} expense{filteredExpenses.length !== 1 ? "s" : ""} found
+        </span>
+      </div>
+
+      {/* STAT CARDS */}
+      <Cards
+        totalSpent={totalSpent}
+        monthlyBudget={totalBudget}
+        savings={savings}
+        usagePercent={usagePercent}
+      />
+
+      {/* CHART + BUDGETS */}
+      <div className="mt-6 grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <div className="lg:col-span-2">
+          <ActivityChart expenses={filteredExpenses} />
+        </div>
+        <div>
+          <LatestBudgets budgets={budgets} />
+        </div>
+      </div>
+
+      {/* LATEST EXPENSES TABLE */}
+      <LatestExpenses
+        expenses={filteredExpenses}
+        onDelete={deleteExpense}
+      />
+    </DashboardLayout>
   );
 };
 

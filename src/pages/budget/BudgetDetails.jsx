@@ -1,214 +1,150 @@
 import { useParams, useNavigate } from "react-router-dom";
-import { useEffect, useState } from "react";
-import Navbar from "../../components/dashboard/Navbar";
-import Sidebar from "../../components/dashboard/Sidebar";
+import { useState } from "react";
+import DashboardLayout from "../../components/dashboard/DashboardLayout";
 import BudgetCard from "../../components/budget/BudgetCard";
-
-const STORAGE_KEY = "moneymate_budgets";
+import { useBudgets } from "../../hooks/useBudgets";
 
 const BudgetDetails = () => {
   const { id } = useParams();
   const navigate = useNavigate();
+  const { budgets, addExpense, deleteExpense } = useBudgets();
 
-  const [budget, setBudget] = useState(null);
-  const [expenseName, setExpenseName] = useState("");
-  const [expenseAmount, setExpenseAmount] = useState("");
+  const budget = budgets.find((b) => String(b.id) === String(id));
 
-  // 🔹 Load budget
-  useEffect(() => {
-    const stored = localStorage.getItem(STORAGE_KEY);
-    if (!stored) return;
+  const [name, setName] = useState("");
+  const [amount, setAmount] = useState("");
 
-    const budgets = JSON.parse(stored);
-    const found = budgets.find(
-      (b) => String(b.id) === String(id)
-    );
-
-    setBudget(found || null);
-  }, [id]);
-
-  // 🔹 Loading state (NO blank screen)
-  if (budget === null) {
+  if (!budget) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-[#f6f7f9]">
-        <p className="text-gray-500">Loading budget…</p>
-      </div>
+      <DashboardLayout>
+        <div className="flex flex-col items-center justify-center min-h-[60vh] text-slate-400 gap-3">
+          <span className="text-4xl">🔍</span>
+          <p className="text-sm font-medium">Budget not found</p>
+          <button
+            onClick={() => navigate("/budget")}
+            className="text-xs text-blue-500 hover:underline"
+          >
+            ← Back to budgets
+          </button>
+        </div>
+      </DashboardLayout>
     );
   }
 
-  // 🔹 Add expense (THIS WAS MISSING ❗)
-  const handleAddExpense = () => {
-    if (!expenseName || !expenseAmount) return;
-
-    const newExpense = {
+  const handleAdd = () => {
+    if (!name.trim() || !amount) return;
+    addExpense(budget.id, {
       id: Date.now(),
-      name: expenseName,
-      amount: Number(expenseAmount),
+      name: name.trim(),
+      amount: Number(amount),
       date: new Date().toISOString().split("T")[0],
-    };
-
-    const budgets =
-      JSON.parse(localStorage.getItem(STORAGE_KEY)) || [];
-
-    const updatedBudgets = budgets.map((b) =>
-      String(b.id) === String(budget.id)
-        ? { ...b, expenses: [...b.expenses, newExpense] }
-        : b
-    );
-
-    localStorage.setItem(
-      STORAGE_KEY,
-      JSON.stringify(updatedBudgets)
-    );
-
-    setBudget(
-      updatedBudgets.find(
-        (b) => String(b.id) === String(budget.id)
-      )
-    );
-
-    setExpenseName("");
-    setExpenseAmount("");
-  };
-
-  // 🔹 Delete expense
-  const handleDeleteExpense = (expenseId) => {
-    const budgets =
-      JSON.parse(localStorage.getItem(STORAGE_KEY)) || [];
-
-    const updatedBudgets = budgets.map((b) =>
-      String(b.id) === String(budget.id)
-        ? {
-            ...b,
-            expenses: b.expenses.filter(
-              (exp) => exp.id !== expenseId
-            ),
-          }
-        : b
-    );
-
-    localStorage.setItem(
-      STORAGE_KEY,
-      JSON.stringify(updatedBudgets)
-    );
-
-    setBudget(
-      updatedBudgets.find(
-        (b) => String(b.id) === String(budget.id)
-      )
-    );
+    });
+    setName("");
+    setAmount("");
   };
 
   return (
-    <div className="min-h-screen bg-[#f6f7f9]">
-      <Navbar />
+    <DashboardLayout>
+      {/* Header */}
+      <div className="flex items-center gap-3 mb-6">
+        <button
+          onClick={() => navigate(-1)}
+          className="w-9 h-9 flex items-center justify-center rounded-xl hover:bg-slate-100 text-slate-500 transition"
+        >
+          ←
+        </button>
+        <div>
+          <h1 className="text-xl font-bold text-slate-900">My Expenses</h1>
+          <p className="text-sm text-slate-400 mt-0.5">{budget.name}</p>
+        </div>
+      </div>
 
-      <div className="flex">
-        <Sidebar />
+      {/* Top layout */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
+        <div className="max-w-lg">
+          <BudgetCard budget={budget} clickable={false} />
+        </div>
 
-        <main className="flex-1 p-6 space-y-6">
-          {/* HEADER */}
-          <div className="flex items-center gap-3">
+        {/* Add Expense Form */}
+        <div className="card-glow bg-white rounded-2xl border border-slate-100 shadow-sm p-6">
+          <h2 className="text-base font-semibold text-slate-900 mb-4">Add Expense</h2>
+          <div className="space-y-3">
+            <input
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+              placeholder="Expense name"
+              className="input-field"
+            />
+            <input
+              type="number"
+              value={amount}
+              onChange={(e) => setAmount(e.target.value)}
+              placeholder="Amount (₹)"
+              className="input-field"
+            />
             <button
-              onClick={() => navigate(-1)}
-              className="text-gray-500 hover:text-gray-900"
+              onClick={handleAdd}
+              disabled={!name.trim() || !amount}
+              className="w-full bg-blue-600 text-white py-2.5 rounded-xl text-sm font-medium
+                         hover:bg-blue-700 active:scale-[0.98] transition-all duration-200
+                         disabled:opacity-40 disabled:cursor-not-allowed"
             >
-              ←
+              + Add Expense
             </button>
-            <h1 className="text-2xl font-semibold">
-              My Expenses
-            </h1>
           </div>
+        </div>
+      </div>
 
-          {/* TOP */}
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-            <div className="max-w-lg">
-              <BudgetCard budget={budget} clickable={false} />
-            </div>
+      {/* Expense Table */}
+      <div className="bg-white rounded-2xl border border-slate-100 shadow-sm p-6">
+        <h2 className="text-base font-semibold text-slate-900 mb-4">Expense History</h2>
 
-            <div className="bg-white rounded-2xl border p-6 shadow-sm">
-              <h2 className="text-lg font-semibold mb-4">
-                Add Expense
-              </h2>
-
-              <div className="space-y-4">
-                <input
-                  value={expenseName}
-                  onChange={(e) =>
-                    setExpenseName(e.target.value)
-                  }
-                  placeholder="Expense name"
-                  className="w-full border rounded-lg px-3 py-2"
-                />
-
-                <input
-                  type="number"
-                  value={expenseAmount}
-                  onChange={(e) =>
-                    setExpenseAmount(e.target.value)
-                  }
-                  placeholder="Expense amount"
-                  className="w-full border rounded-lg px-3 py-2"
-                />
-
-                <button
-                  onClick={handleAddExpense}
-                  className="w-full bg-blue-600 text-white py-2 rounded-lg"
-                >
-                  Add New Expense
-                </button>
-              </div>
-            </div>
+        {(budget.expenses || []).length === 0 ? (
+          <div className="text-center py-10 text-slate-400">
+            <span className="text-3xl block mb-2">🧾</span>
+            <p className="text-sm">No expenses yet</p>
           </div>
-
-          {/* TABLE */}
-          <div className="bg-white rounded-2xl border p-6 shadow-sm">
-            <h2 className="text-lg font-semibold mb-4">
-              Latest Expenses
-            </h2>
-
-            <table className="w-full text-sm">
-              <thead className="bg-gray-50">
-                <tr>
-                  <th className="p-3 text-left">Name</th>
-                  <th className="p-3 text-left">Amount</th>
-                  <th className="p-3 text-left">Date</th>
-                  <th className="p-3 text-center">Action</th>
+        ) : (
+          <div className="overflow-x-auto rounded-xl border border-slate-100">
+            <table className="w-full text-sm border-collapse">
+              <thead>
+                <tr className="bg-slate-900 text-white">
+                  <th className="py-3 px-4 text-left text-xs font-medium uppercase tracking-wide">Name</th>
+                  <th className="py-3 px-4 text-left text-xs font-medium uppercase tracking-wide">Amount</th>
+                  <th className="py-3 px-4 text-left text-xs font-medium uppercase tracking-wide">Date</th>
+                  <th className="py-3 px-4 text-center text-xs font-medium uppercase tracking-wide">Action</th>
                 </tr>
               </thead>
               <tbody>
-                {budget.expenses.length === 0 ? (
-                  <tr>
-                    <td
-                      colSpan={4}
-                      className="p-4 text-center text-gray-400"
-                    >
-                      No expenses added yet
+                {[...(budget.expenses || [])].reverse().map((exp, i) => (
+                  <tr
+                    key={exp.id}
+                    className={`border-b border-slate-50 hover:bg-blue-50/40 transition-colors duration-150
+                      ${i % 2 === 0 ? "bg-white" : "bg-slate-50/40"}`}
+                  >
+                    <td className="py-3 px-4 font-medium text-slate-800">{exp.name}</td>
+                    <td className="py-3 px-4 font-semibold text-blue-600">
+                      ₹{exp.amount.toLocaleString("en-IN")}
                     </td>
-                  </tr>
-                ) : (
-                  budget.expenses.map((exp) => (
-                    <tr key={exp.id} className="border-t">
-                      <td className="p-3">{exp.name}</td>
-                      <td className="p-3">₹{exp.amount}</td>
-                      <td className="p-3">{exp.date}</td>
-                      <td
-                        onClick={() =>
-                          handleDeleteExpense(exp.id)
-                        }
-                        className="p-3 text-center text-red-500 cursor-pointer hover:text-red-700"
+                    <td className="py-3 px-4 text-slate-500 text-xs">{exp.date}</td>
+                    <td className="py-3 px-4 text-center">
+                      <button
+                        onClick={() => deleteExpense(budget.id, exp.id)}
+                        className="w-8 h-8 inline-flex items-center justify-center rounded-lg
+                                   text-slate-400 hover:text-red-500 hover:bg-red-50
+                                   transition-all duration-200"
                       >
                         🗑️
-                      </td>
-                    </tr>
-                  ))
-                )}
+                      </button>
+                    </td>
+                  </tr>
+                ))}
               </tbody>
             </table>
           </div>
-        </main>
+        )}
       </div>
-    </div>
+    </DashboardLayout>
   );
 };
 

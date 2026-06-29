@@ -2,95 +2,97 @@ import { useState } from "react";
 import Picker from "@emoji-mart/react";
 import data from "@emoji-mart/data";
 
-
 const CreateBudgetModal = ({ onClose, onCreate }) => {
   const [icon, setIcon] = useState("");
   const [name, setName] = useState("");
   const [amount, setAmount] = useState("");
-  const [showEmojiPicker, setShowEmojiPicker] = useState(false);
+  const [showPicker, setShowPicker] = useState(false);
+  const [errors, setErrors] = useState({});
+
+  const validate = () => {
+    const e = {};
+    if (!name.trim()) e.name = "Budget name is required";
+    if (!amount || Number(amount) <= 0) e.amount = "Enter a valid amount";
+    return e;
+  };
 
   const handleSubmit = () => {
-    if (!name || !amount) return;
-
-    onCreate({
-      id: Date.now(),
-      icon: icon || "💰",
-      name,
-      amount: Number(amount),
-      expenses: []
-    });
-
+    const errs = validate();
+    if (Object.keys(errs).length) { setErrors(errs); return; }
+    onCreate({ id: Date.now(), icon: icon || "💰", name: name.trim(), amount: Number(amount), expenses: [] });
     onClose();
   };
 
   return (
-    <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50">
-      <div className="bg-white rounded-xl p-6 w-full max-w-sm relative">
-        <h2 className="text-lg font-semibold mb-4">Create New Budget</h2>
-
-        {/* Emoji Selector */}
-       {/* Emoji Selector */}
-<div className="mb-4 relative">
-  <label className="block text-sm font-medium text-gray-700 mb-2">
-    Icon
-  </label>
-
-  {/* Square placeholder */}
-  <div
-    onClick={() => setShowEmojiPicker((prev) => !prev)}
-    className="w-14 h-14 flex items-center justify-center
-               border-2 border-dashed border-gray-300
-               rounded-lg cursor-pointer
-               hover:border-blue-500 transition
-               text-2xl"
-  >
-    {icon || "➕"}
-  </div>
-
-  {/* Full Emoji Picker */}
-  {showEmojiPicker && (
-    <div className="absolute mt-2 z-30">
-      <Picker
-        data={data}
-        onEmojiSelect={(emoji) => {
-          setIcon(emoji.native);
-          setShowEmojiPicker(false);
-        }}
-        previewPosition="none"
-        theme="light"
-      />
-    </div>
-  )}
-</div>
-
-
-        {/* Budget Name */}
-        <input
-          value={name}
-          onChange={(e) => setName(e.target.value)}
-          className="w-full mb-3 border rounded-lg p-2"
-          placeholder="Budget name"
-        />
-
-        {/* Budget Amount */}
-        <input
-          type="number"
-          value={amount}
-          onChange={(e) => setAmount(e.target.value)}
-          className="w-full mb-4 border rounded-lg p-2"
-          placeholder="Budget amount"
-        />
-
-        <div className="flex justify-end gap-3">
+    <div
+      className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4"
+      onClick={(e) => e.target === e.currentTarget && onClose()}
+    >
+      <div className="bg-white rounded-2xl p-6 w-full max-w-sm shadow-2xl">
+        <div className="flex items-center justify-between mb-5">
+          <h2 className="text-base font-bold text-slate-900">Create New Budget</h2>
           <button
             onClick={onClose}
-            className="px-4 py-2 text-sm text-gray-600"
+            className="w-8 h-8 flex items-center justify-center rounded-lg hover:bg-slate-100 text-slate-400 transition"
           >
+            ✕
+          </button>
+        </div>
+
+        {/* Emoji */}
+        <div className="mb-4 relative">
+          <label className="block text-xs font-medium text-slate-500 mb-2">Icon</label>
+          <div
+            onClick={() => setShowPicker((p) => !p)}
+            className="w-14 h-14 flex items-center justify-center rounded-2xl border-2
+                       border-dashed border-slate-200 cursor-pointer hover:border-blue-400
+                       text-2xl transition-all duration-200"
+          >
+            {icon || "➕"}
+          </div>
+          {showPicker && (
+            <div className="absolute mt-2 z-30">
+              <Picker
+                data={data}
+                onEmojiSelect={(e) => { setIcon(e.native); setShowPicker(false); }}
+                previewPosition="none"
+                theme="light"
+              />
+            </div>
+          )}
+        </div>
+
+        {/* Name */}
+        <div className="mb-3">
+          <input
+            value={name}
+            onChange={(e) => setName(e.target.value)}
+            className="input-field"
+            placeholder="Budget name (e.g. Groceries)"
+          />
+          {errors.name && <p className="text-xs text-red-500 mt-1">{errors.name}</p>}
+        </div>
+
+        {/* Amount */}
+        <div className="mb-5">
+          <input
+            type="number"
+            value={amount}
+            onChange={(e) => setAmount(e.target.value)}
+            className="input-field"
+            placeholder="Budget limit (₹)"
+          />
+          {errors.amount && <p className="text-xs text-red-500 mt-1">{errors.amount}</p>}
+        </div>
+
+        <div className="flex gap-3">
+          <button onClick={onClose} className="flex-1 btn-secondary border border-slate-200">
             Cancel
           </button>
           <button
             onClick={handleSubmit}
-            className="px-4 py-2 text-sm bg-blue-600 text-white rounded-lg"
+            className="flex-1 bg-blue-600 text-white py-2.5 rounded-xl text-sm font-medium
+                       hover:bg-blue-700 active:scale-[0.98] transition-all duration-200"
           >
             Create
           </button>
